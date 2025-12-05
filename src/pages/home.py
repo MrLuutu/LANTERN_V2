@@ -2,7 +2,7 @@ import streamlit as st
 
 
 def app():
-    st.title("Lantern Air Lite")
+    st.title("Lantern Air Lite - V2 prototype")
     st.header("Overview")
     st.write(
         "Lantern Air Lite is a minimal Streamlit dashboard for exploring air quality data."
