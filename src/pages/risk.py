@@ -151,3 +151,20 @@ def app():
     #Show pollutant over time graph
     st.subheader(f"{parameter.upper()} levels over time in {city}")
     st.line_chart(subset.set_index("timestamp")["value"], height=400)
+
+    risk_counts = {
+        "Good": 0,
+        "Satisfactory": 0,
+        "Moderately polluted": 0,
+        "Poor": 0,
+        "Very poor": 0,
+        "Severe": 0,
+    }
+
+    for index, row in subset.iterrows():
+        level = compute_risk(parameter, row["value"])
+        if level in risk_counts:
+            risk_counts[level] += 1
+
+    risk_counts_df = pd.DataFrame(list(risk_counts.items()), columns=["Risk Level", "Count"])
+    st.dataframe(risk_counts_df)
