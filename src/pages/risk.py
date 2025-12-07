@@ -33,7 +33,7 @@ def load_city_data():
 
 
 def app():
-    st.title("Asthma Risk")
+    st.title("Asthma Risks")
 
     df = load_city_data()
 
