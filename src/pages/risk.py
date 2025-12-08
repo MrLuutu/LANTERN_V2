@@ -161,10 +161,23 @@ def app():
         "Severe": 0,
     }
 
+    #Count risk levels in chosen subset
     for index, row in subset.iterrows():
         level = compute_risk(parameter, row["value"])
         if level in risk_counts:
             risk_counts[level] += 1
 
+    #Show table of risk levels and counts
     risk_counts_df = pd.DataFrame(list(risk_counts.items()), columns=["Risk Level", "Count"])
     st.dataframe(risk_counts_df)
+
+    #Bar graph of risk levels, color coded
+    bar_risk_chart, axes_bar = plt.subplots()
+    axes_bar.bar(risk_counts_df["Risk Level"], risk_counts_df["Count"], color=[risk_colors[level] for level in risk_counts_df["Risk Level"]])
+    axes_bar.set_xlabel("Risk Level")
+    axes_bar.set_ylabel("Count")
+    axes_bar.set_title("Risk Levels Count")
+
+    #Rotate x axis so text doesn't overlap, ha = horizontal alignment
+    plt.xticks(rotation=45, ha='right')
+    st.pyplot(bar_risk_chart)
