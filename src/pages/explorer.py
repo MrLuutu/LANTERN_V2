@@ -21,11 +21,8 @@ def app():
     #Set title
     st.title("Air Quality Explorer")
 
- #Create dataframe of the cities
+    #Create dataframe of the cities
     df = load_city_data()
-
-    #Create subdataframe with relevant columns
-    df_relevant = df[["city", "parameter", "value", "unit", "datetimelocal", "latitude", "longitude"]].copy()
 
     #Let user select city, and create subdataframe for that city only
     city = st.selectbox("City", sorted(df["city"].unique()))
@@ -45,23 +42,56 @@ def app():
         st.warning("No data for selected pollutant.")
         return
 
-
     #Create line chart of chosen parameter over time
     subdf = city_df[["datetimelocal", "value"]]
     graph, axes = plt.subplots()
     axes.plot(subdf["datetimelocal"], subdf["value"])
+    axes.grid(True)
 
+    #Set labels
     axes.set_title(f"{parameter} levels over time in {city}")
     axes.set_xlabel("Date")
     axes.set_ylabel(parameter)
 
-    #Format x-axis labels to include only date and only show one ever 24 hours
-   # axes.set_xticklabels([x[:10] for x in subdf["datetimelocal"]], rotation=45, ha="right")
-    axes.set_xticklabels(axes.get_xticklabels(), rotation=45, ha="right")
-    axes.set_xticks(axes.get_xticks()[::24])
-    st.pyplot(graph)
+    #Mess around with tick spacing on x-axis
+    ticks = axes.get_xticks()
+
+    #Indexing start/stop/step
+    begin_at = (len(subset) - 1) % 24 #Minus one to avoid missing final tick - most recent reading
+    st.write(len(subset))
+    every_24th = ticks[begin_at::24]
+    axes.set_xticks(every_24th)
+
+    #Set more readable date format for x-axis ticks
+
+    dates = {"01": "January",
+             "02": "February",
+             "03": "March",
+             "04": "April",
+             "05": "May",
+             "06": "June",
+             "07": "July",
+             "08": "August",
+             "09": "September",
+             "10": "October",
+             "11": "November",
+             "12": "December"}
     
-    #need to add bar chart of worst pollution days here or in risk?
+    cleaned_ticks = []
+
+    #First 4 numbers are year, then a dash, then 2 for month, dash, 2 for day
+    for label in axes.get_xticklabels():
+        tick = label.get_text()
+        year = tick[0:4]
+        month = tick[5:7]
+        day = tick[8:10]
+        if month in dates:
+            new_tick = f"{dates[month]} {day}, {year}"
+
+        cleaned_ticks.append(new_tick)
+    
+    axes.set_xticklabels(cleaned_ticks, rotation=45, ha="right")
+    st.pyplot(graph)
 
     #Display data and map, with information relevant to user
 
