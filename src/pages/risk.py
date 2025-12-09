@@ -148,10 +148,6 @@ def app():
     st.write(f"General recommendation for today: {recs[risk]}")
     st.write(f"Your recommendation for right now: {recs[personal_risk]}")
 
-    #Show pollutant over time graph
-    st.subheader(f"{parameter.upper()} levels over time in {city}")
-    st.line_chart(subset.set_index("timestamp")["value"], height=400)
-
     risk_counts = {
         "Good": 0,
         "Satisfactory": 0,
@@ -169,14 +165,21 @@ def app():
 
     #Show table of risk levels and counts
     risk_counts_df = pd.DataFrame(list(risk_counts.items()), columns=["Risk Level", "Count"])
+    st.subheader("Risk Levels Count")
+    st.write(f"**Table:** Hours at each risk level in the past {len(subset)} hours")
     st.dataframe(risk_counts_df)
 
     #Bar graph of risk levels, color coded
+    st.write(f"**Graph:** Hours at each risk level in the past {len(subset)} hours, color coded for severity")
     bar_risk_chart, axes_bar = plt.subplots()
     axes_bar.bar(risk_counts_df["Risk Level"], risk_counts_df["Count"], color=[risk_colors[level] for level in risk_counts_df["Risk Level"]])
     axes_bar.set_xlabel("Risk Level")
     axes_bar.set_ylabel("Count")
     axes_bar.set_title("Risk Levels Count")
+
+    #Shrink graph to fit better on site
+    bar_chart_loc = axes_bar.get_position()
+    axes_bar.set_position([bar_chart_loc.x0, bar_chart_loc.y0, bar_chart_loc.width, bar_chart_loc.height * 0.5])
 
     #Rotate x axis so text doesn't overlap, ha = horizontal alignment
     plt.xticks(rotation=45, ha='right')
