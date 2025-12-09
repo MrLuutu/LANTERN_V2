@@ -1,18 +1,25 @@
 import streamlit as st
 
-
+#main running function
 def app():
+    #Title of project and description
     st.title("Lantern Air Lite - V2 prototype")
     st.header("Overview")
+    st.image("data/cat_and_dog.png")
     st.write(
         "Lantern Air Lite is a minimal Streamlit dashboard for exploring air quality data."
     )
+
+    #Let user choose which info they want to learn about
     info = st.selectbox("Select an option to learn more about it:", ["Website Overview", "What is Asthma?", "What is AQI?", "The Importance of Air Quality"])
     
+    #Display info about the website functionality itself
     if info == "Website Overview":
         st.markdown("**Home** describes the functionality of the pagse of the website and provides background information on asthma and AQI:")
         st.markdown("**Air Quality Explorer** shows charts and maps of air quality data for different cities and parameters.")
         st.markdown("**Asthma Risk** offers an estimation of general and personal risk  based on air quality readings.")
+    
+    #Display information about asthma, aqi and air quality importance if requested
     elif info == "What is Asthma?":
         st.write("Asthma is a long-term condition that makes the airways in your lungs extra sensitive. When something triggers them—like allergies, exercise, or cold air—the airways can tighten, swell, and produce extra mucus. This can cause symptoms such as coughing, wheezing, chest tightness, and shortness of breath. Asthma varies from person to person, but with proper management and treatment, most people can keep their symptoms under good control and live active, healthy lives.")
     elif info == "What is AQI?":
