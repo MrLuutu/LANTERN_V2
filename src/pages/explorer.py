@@ -1,77 +1,134 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import folium
+from streamlit_folium import st_folium
 from src.utils.clean_data import load_openaq
 
-#Load data for cities
-def load_city_data():
 
-    #Load for Kampala
+# ======================================================
+# LOAD DATA
+# ======================================================
+def load_city_data():
+    # Kampala
     ug = load_openaq("data/clean_openaq.csv")
     ug["city"] = "Kampala"
+    ug["datetimelocal"] = pd.to_datetime(
+        ug["datetimelocal"], format="mixed", errors="coerce"
+    )
 
-    #Load for Boston
+    # Boston
     bo = load_openaq("data/openaq_boston.csv")
     bo["city"] = "Boston"
+    bo["datetimelocal"] = pd.to_datetime(
+        bo["datetimelocal"], format="mixed", errors="coerce"
+    )
 
-    #Return a combined dataframe for all cities
     return pd.concat([ug, bo], ignore_index=True)
 
-def app():
-    #Set title
-    st.title("Air Quality Explorer")
 
- #Create dataframe of the cities
+# ======================================================
+# STREAMLIT PAGE
+# ======================================================
+def app():
+
+    st.title("🌍 Air Quality Explorer")
+    st.caption("Analyze PM pollution levels across Kampala and Boston")
+
     df = load_city_data()
 
-    #Create subdataframe with relevant columns
-    df_relevant = df[["city", "parameter", "value", "unit", "datetimelocal", "latitude", "longitude"]].copy()
+    # -------------------------
+    # FILTERS
+    # -------------------------
+    st.subheader("Filters")
+    city = st.selectbox("Select City", sorted(df["city"].unique()))
 
-    #Let user select city, and create subdataframe for that city only
-    city = st.selectbox("City", sorted(df["city"].unique()))
     city_df = df[df["city"] == city].copy()
-
-    #If missing data, return warning
     if city_df.empty:
-        st.warning("No data for selected city.")
+        st.warning("No data available for this city.")
         return
 
-    #Let user choose parameter (pm10, pm25) and create further subdataframe for it
-    parameter = st.selectbox("Pollutant", sorted(city_df["parameter"].unique()))
-    subset = city_df[city_df["parameter"] == parameter]
+    parameter = st.selectbox("Select Pollutant", sorted(city_df["parameter"].unique()))
+    sub = city_df[city_df["parameter"] == parameter]
 
-    #If missing data, return warning
-    if subset.empty:
-        st.warning("No data for selected pollutant.")
+    if sub.empty:
+        st.warning("No data for this pollutant.")
         return
 
+    # ======================================================
+    # SUMMARY METRICS
+    # ======================================================
+    st.subheader("📊 Summary Metrics")
 
-    #Create line chart of chosen parameter over time
-    subdf = city_df[["datetimelocal", "value"]]
-    graph, axes = plt.subplots()
-    axes.plot(subdf["datetimelocal"], subdf["value"])
+    col1, col2, col3 = st.columns(3)
 
-    axes.set_title(f"{parameter} levels over time in {city}")
-    axes.set_xlabel("Date")
-    axes.set_ylabel(parameter)
+    col1.metric("Highest Value", f"{sub['value'].max():.2f} {sub['unit'].iloc[0]}")
+    col2.metric("Lowest Value", f"{sub['value'].min():.2f} {sub['unit'].iloc[0]}")
+    col3.metric("Average Level", f"{sub['value'].mean():.2f} {sub['unit'].iloc[0]}")
 
-    #Format x-axis labels to include only date and only show one ever 24 hours
-   # axes.set_xticklabels([x[:10] for x in subdf["datetimelocal"]], rotation=45, ha="right")
-    axes.set_xticklabels(axes.get_xticklabels(), rotation=45, ha="right")
-    axes.set_xticks(axes.get_xticks()[::24])
-    st.pyplot(graph)
-    
-    #need to add bar chart of worst pollution days here or in risk?
+    # ======================================================
+    # LINE CHART
+    # ======================================================
+    st.subheader(f"📈 {parameter.upper()} Trend — {city}")
 
-    #Display data and map, with information relevant to user
+    line_df = (
+        sub[["datetimelocal", "value"]]
+        .dropna()
+        .sort_values("datetimelocal")
+    )
 
-    subset_rel = subset[["parameter", "datetimelocal", "value", "unit"]].copy()
-    st.subheader("Data")
-    st.dataframe(subset_rel.sort_values("datetimelocal", ascending=False))
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.plot(line_df["datetimelocal"], line_df["value"], color="steelblue", linewidth=2)
 
-    st.subheader("Map (placeholder)")
-    coords = subset[["latitude", "longitude"]].dropna().rename(columns={"latitude": "lat", "longitude": "lon"})
+    ax.set_xlabel("Time")
+    ax.set_ylabel(parameter.upper())
+    ax.set_title(f"{parameter.upper()} Levels Over Time")
+
+    plt.xticks(rotation=45)
+    st.pyplot(fig)
+
+    # ======================================================
+    # FOLIUM MAP
+    # ======================================================
+    st.subheader("🗺️ Sensor Locations")
+
+    coords = sub[["latitude", "longitude"]].dropna()
+
     if not coords.empty:
-        st.map(coords)
+        lat_center = coords["latitude"].mean()
+        lon_center = coords["longitude"].mean()
+
+        fmap = folium.Map(location=[lat_center, lon_center], zoom_start=12)
+
+        for _, row in coords.iterrows():
+            folium.CircleMarker(
+                location=[row["latitude"], row["longitude"]],
+                radius=5,
+                color="red",
+                fill=True
+            ).add_to(fmap)
+
+        st_folium(fmap, width=750, height=500)
     else:
-        st.write("No coordinates available for map.")
+        st.info("No coordinate data available for this pollutant.")
+
+    # ======================================================
+    # RAW DATA + DOWNLOAD
+    # ======================================================
+    st.subheader("📄 Raw Data Table")
+
+    clean_table = (
+        sub[["datetimelocal", "parameter", "value", "unit", "latitude", "longitude"]]
+        .sort_values("datetimelocal", ascending=False)
+    )
+
+    st.dataframe(clean_table, use_container_width=True)
+
+    csv = clean_table.to_csv(index=False).encode("utf-8")
+
+    st.download_button(
+        label="⬇️ Download CSV",
+        data=csv,
+        file_name=f"{city}_{parameter}_air_quality.csv",
+        mime="text/csv",
+    )

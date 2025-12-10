@@ -1,29 +1,166 @@
 import streamlit as st
 
-#main running function
 def app():
-    #Title of project and description
-    st.title("Lantern Air Lite - V2 prototype")
-    st.header("Overview")
-    st.image("data/cat_and_dog.png")
-    st.write(
-        "Lantern Air Lite is a minimal Streamlit dashboard for exploring air quality data."
+
+    st.set_page_config(layout="wide")
+
+    # =========================
+    # PREMIUM HERO SECTION
+    # =========================
+    HERO_URL = "https://images.unsplash.com/photo-1505751172876-fa1923c5c528"
+
+    st.markdown(
+        f"""
+        <style>
+            .hero {{
+                position: relative;
+                width: 100%;
+                height: 380px;
+                border-radius: 16px;
+                overflow: hidden;
+                margin-bottom: 30px;
+            }}
+
+            .hero img {{
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                filter: brightness(60%);
+            }}
+
+            .hero-text {{
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: white;
+                text-align: center;
+                font-family: 'Helvetica Neue', sans-serif;
+            }}
+
+            .hero-title {{
+                font-size: 48px;
+                font-weight: 800;
+                letter-spacing: -1px;
+                margin-bottom: 10px;
+            }}
+
+            .hero-sub {{
+                font-size: 20px;
+                font-weight: 300;
+                opacity: 0.9;
+            }}
+
+            /* Feature cards */
+            .card {{
+                padding: 25px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 14px;
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                margin-bottom: 20px;
+            }}
+
+            .card-title {{
+                font-size: 22px;
+                font-weight: 600;
+                margin-bottom: 8px;
+            }}
+
+            .cta-button {{
+                display: inline-block;
+                padding: 12px 28px;
+                background: #2e7df6;
+                color: white;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                margin-top: 18px;
+            }}
+
+            .cta-button:hover {{
+                background: #1b57aa;
+            }}
+
+        </style>
+        """,
+        unsafe_allow_html=True,
     )
 
-    #Let user choose which info they want to learn about
-    info = st.selectbox("Select an option to learn more about it:", ["Website Overview", "What is Asthma?", "What is AQI?", "The Importance of Air Quality"])
-    
-    #Display info about the website functionality itself
-    if info == "Website Overview":
-        st.markdown("**Home** describes the functionality of the pagse of the website and provides background information on asthma and AQI:")
-        st.markdown("**Air Quality Explorer** shows charts and maps of air quality data for different cities and parameters.")
-        st.markdown("**Asthma Risk** offers an estimation of general and personal risk  based on air quality readings.")
-    
-    #Display information about asthma, aqi and air quality importance if requested
-    elif info == "What is Asthma?":
-        st.write("Asthma is a long-term condition that makes the airways in your lungs extra sensitive. When something triggers them—like allergies, exercise, or cold air—the airways can tighten, swell, and produce extra mucus. This can cause symptoms such as coughing, wheezing, chest tightness, and shortness of breath. Asthma varies from person to person, but with proper management and treatment, most people can keep their symptoms under good control and live active, healthy lives.")
-    elif info == "What is AQI?":
-        st.write("The Air Quality Index (AQI) is a simple rating system that tells you how clean or polluted the air is and how that pollution might affect your health. It uses a scale—usually from 0 to 500—where lower numbers mean cleaner air and higher numbers mean more pollution. The AQI is often color-coded (like green for good air and red or purple for unhealthy air) so you can quickly understand whether it’s safe to be outdoors or if you should limit activities, especially if you have conditions like asthma.")
-    elif info == "The Importance of Air Quality":
-        st.write("Air quality matters because the air you breathe directly affects your health and overall well-being. When the air is clean, your lungs and heart don’t have to work as hard, and it’s easier to stay active and healthy. But when the air contains pollutants—like smoke, vehicle exhaust, or allergens—it can irritate your lungs, trigger breathing problems, worsen conditions like asthma, and even affect long-term health. Good air quality also supports healthy communities, protects children and older adults, and helps the environment stay balanced. In short, cleaner air means a healthier life for everyone.")
-    
+    # HERO IMAGE + TEXT
+    st.markdown(
+        f"""
+        <div class="hero">
+            <img src="{HERO_URL}">
+            <div class="hero-text">
+                <div class="hero-title">Lantern Air Lite</div>
+                <div class="hero-sub">Real-time insights on air quality & asthma health analytics</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.write("")  # spacing
+
+    # =========================
+    # FEATURE CARDS SECTION
+    # =========================
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.markdown(
+            """
+            <div class="card">
+                <div class="card-title">🌍 Air Quality Explorer</div>
+                Explore pollution trends, sensor data, and spatial maps for different cities.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with col2:
+        st.markdown(
+            """
+            <div class="card">
+                <div class="card-title">❤️ Asthma Risk Insights</div>
+                Estimate environmental asthma triggers using local AQI & PM readings.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with col3:
+        st.markdown(
+            """
+            <div class="card">
+                <div class="card-title">📊 Health Analytics</div>
+                Understand long-term pollution exposure patterns and health correlations.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    # =========================
+    # CALL TO ACTION
+    # =========================
+    st.markdown(
+        """
+        <div style="text-align:center; margin-top:30px;">
+            <a class="cta-button" href="?Air_Quality_Explorer">Launch Dashboard</a>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Description footer
+    st.markdown(
+        """
+        <br><br>
+        <div style="text-align:center; font-size:14px; opacity:0.6;">
+            Built for environmental analytics, public health insights, and data-driven air monitoring.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )

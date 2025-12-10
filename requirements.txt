@@ -5,3 +5,6 @@ altair
 pydeck
 requests
 matplotlib
+pydeck
+streamlit-folium
+folium
