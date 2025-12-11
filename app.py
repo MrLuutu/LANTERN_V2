@@ -1,3 +1,16 @@
+"""
+Name: Andrew Luutu & Jacob LeMoine
+Date: Fall 2025
+URL: https://lanternv2-9bdzqdpxngocf7cfonpb8c.streamlit.app/
+
+Description:
+This open-source program is an interactive Streamlit application that visualizes
+air-quality data from OpenAQ for Boston and Kampala. It includes data cleaning,
+analytics, a line chart, summary metrics, and an interactive Folium map. Users
+can explore pollution trends, filter parameters, and analyze exposure risks.
+"""
+
+
 import streamlit as st
 from src.pages import home, explorer, risk
 
